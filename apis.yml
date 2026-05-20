@@ -20,6 +20,8 @@ position: Consumer
 specificationVersion: '0.19'
 apis: []
 common:
+  - type: LinkedIn
+    url: https://www.linkedin.com/company/odni
   - type: Website
     url: https://www.dni.gov/
 maintainers:
