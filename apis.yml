@@ -20,6 +20,8 @@ position: Consumer
 specificationVersion: '0.19'
 apis: []
 common:
+  - type: DomainSecurity
+    url: security/director-of-national-intelligence-domain-security.yml
   - type: LinkedIn
     url: https://www.linkedin.com/company/odni
   - type: Website
