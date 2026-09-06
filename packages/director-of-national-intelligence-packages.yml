@@ -1,0 +1,51 @@
+generated: '2026-09-06'
+method: searched
+source: live registry queries against npm, PyPI, RubyGems, crates.io, NuGet and Packagist, plus the GitHub org search API (2026-09-06)
+package_count: 0
+official_package_count: 0
+note: >-
+  ODNI ships no client libraries. No first-party SDK exists in any public registry, ODNI publishes no SDK
+  or CLI page, and no verifiable ODNI GitHub organization exists. No SDKs pointer is wired in apis.yml,
+  because there are no SDKs. The one interesting registry result is third-party: four crates.io crates
+  vendor ODNI's own IC XML schemas (see third_party_vendoring below), which is the clearest evidence that
+  ODNI's machine-readable output is its IC technical specifications rather than any API client.
+packages: []
+searched:
+  - {registry: npm, endpoint: 'https://registry.npmjs.org/-/v1/search?text=odni', total: 1, result: 'one unrelated package (interscript); no ODNI package'}
+  - {registry: npm, endpoint: 'https://registry.npmjs.org/-/v1/search?text=dni.gov', total: 0, result: none}
+  - {registry: pypi, endpoint: 'https://pypi.org/pypi/odni/json', status: 404, result: none}
+  - {registry: pypi, endpoint: 'https://pypi.org/pypi/dni-gov/json', status: 404, result: none}
+  - {registry: pypi, endpoint: 'https://pypi.org/pypi/odni-api/json', status: 404, result: none}
+  - {registry: rubygems, endpoint: 'https://rubygems.org/api/v1/search.json?query=odni', total: 0, result: none}
+  - {registry: nuget, endpoint: 'https://azuresearch-usnc.nuget.org/query?q=odni', total: 0, result: none}
+  - {registry: packagist, endpoint: 'https://packagist.org/search.json?q=odni', result: 'no ODNI-authored package in the result set'}
+  - {registry: crates.io, endpoint: 'https://crates.io/api/v1/crates?q=odni', total: 5, result: 'four third-party ISM schema crates — see third_party_vendoring'}
+third_party_vendoring:
+  note: >-
+    These are NOT ODNI packages and are not counted above. They are third-party redistributions of ODNI's
+    publicly released IC XML schemas, and they are dated evidence of which schema release third parties
+    are still working from.
+  packages:
+    - {language: rust, registry: crates.io, name: ism, url: 'https://crates.io/crates/ism', official: false, version: 20230609.0.0, published: '2026-05-09', repository: 'https://github.com/marquetools/ism-data', description: 'ODNI ISM (Information Security Marking) schema package, vendored'}
+    - {language: rust, registry: crates.io, name: ism-data, url: 'https://crates.io/crates/ism-data', official: false, version: 20230609.0.0, published: '2026-05-09', repository: 'https://github.com/marquetools/ism-data', description: 'ODNI public XML schema metadata: package list and namespace registry'}
+    - {language: rust, registry: crates.io, name: ism-ismcat, url: 'https://crates.io/crates/ism-ismcat', official: false, version: 20230609.0.0, published: '2026-05-09', repository: 'https://github.com/marquetools/ism-data', description: 'ODNI ISMCAT schema package, vendored'}
+    - {language: rust, registry: crates.io, name: ism-ic-genc, url: 'https://crates.io/crates/ism-ic-genc', official: false, version: 20230609.0.0, published: '2026-05-09', repository: 'https://github.com/marquetools/ism-data', description: 'ODNI IC-GENC schema package, vendored'}
+  observation: >-
+    The vendored schema version is 20230609 — the June 2023 IC schema release. ODNI itself no longer
+    serves those schemas from odni.gov (see lifecycle/), so a vendored 2023 copy in a third-party crate is
+    currently a more reachable source of ODNI's own specifications than ODNI is.
+github_org:
+  candidate: https://github.com/ODNI
+  status: rejected
+  evidence:
+    url: https://api.github.com/orgs/ODNI
+    status: 200
+    is_verified: false
+    public_repos: 1
+    only_repo: 'PDRC — "Smart Networking Overtly Worldwise", last pushed 2018-09-09'
+    created_at: '2018-08-09T08:29:15Z'
+    description: null
+  reason: >-
+    Unverified, one unrelated repository last touched in 2018, no description or contact, and not linked
+    from any ODNI property. Attributing it to the Office of the Director of National Intelligence would be
+    a guess, so no GitHubOrganization pointer is wired.

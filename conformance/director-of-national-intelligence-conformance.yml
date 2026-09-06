@@ -1,0 +1,109 @@
+generated: '2026-09-06'
+method: probed
+source: >-
+  openapi/director-of-national-intelligence-wp-content-openapi.yml, the verbatim route index, and live
+  response headers observed 2026-09-06
+note: >-
+  Cross-cutting standards the catalogued surface does and does not conform to. Reward-only: a standard
+  the provider's market does not have is not a penalty, and nothing here is asserted without a location
+  in the contract or a live response to point at.
+standards:
+  - id: rest
+    conforms: true
+    evidence: Resource-oriented JSON over HTTPS with GET semantics; collections and item routes.
+  - id: rfc8288-web-linking
+    conforms: true
+    evidence: 'Link header carries rel="next" / rel="prev" on paginated collections (observed on /wp/v2/posts).'
+  - id: oembed-1.0
+    conforms: true
+    evidence: 'The oembed/1.0 namespace is registered in the route index and /oembed/1.0/embed returns an oEmbed 1.0 document (200, verified 2026-09-06).'
+  - id: hal-style-hypermedia
+    conforms: partial
+    evidence: >-
+      Every record carries a _links object with self/collection/about/author/curies, but the link values
+      use the /wp-json/ base which the edge 301s, so the hypermedia is present and not followable.
+  - id: rfc9457-problem-details
+    conforms: false
+    evidence: 'Errors are application/json in the WordPress envelope {code, message, data.status}; no application/problem+json is served.'
+  - id: oauth2
+    conforms: false
+    evidence: No oauth2 security scheme; no /.well-known/oauth-authorization-server (302 to homepage).
+  - id: oidc
+    conforms: false
+    evidence: '/.well-known/openid-configuration returns 302 to the homepage; no OIDC discovery document.'
+  - id: rfc9116-security-txt
+    conforms: false
+    evidence: '/.well-known/security.txt returns 302 to the homepage on every host (see well-known/).'
+  - id: rfc8594-sunset-header
+    conforms: false
+    evidence: No Sunset or Deprecation headers on any observed response.
+  - id: rfc9239-ratelimit-headers
+    conforms: false
+    evidence: No RateLimit-* or X-RateLimit-* headers on any observed response.
+  - id: apis-json
+    conforms: false
+    evidence: '/apis.json, /apis.yml and /.well-known/apis.json all 302 to the homepage.'
+  - id: openapi
+    conforms: false
+    evidence: >-
+      ODNI publishes no OpenAPI. The specification in this repo was DERIVED by API Evangelist from the
+      live route discovery document and is marked as such; it is not an ODNI conformance claim.
+  - id: mcp
+    conforms: false
+    evidence: No MCP server is published; the manifest in mcp/ is a candidate, not a server.
+  - id: a2a
+    conforms: false
+    evidence: 'No agent card at /.well-known/agent-card.json or /.well-known/agent.json on any host (302 to homepage).'
+  - id: sitemaps-0.9
+    conforms: true
+    evidence: 'https://www.odni.gov/wp-sitemap.xml is a valid sitemapindex (200, verified 2026-09-06).'
+  - id: rss-2.0
+    conforms: true
+    evidence: 'https://www.odni.gov/feed/ returns a 536-item RSS 2.0 document (200, verified 2026-09-06).'
+domain_standards:
+  note: >-
+    The domain standard for this provider's market is the Intelligence Community technical specification
+    family that ODNI's own IC CIO authored — Information Security Marking (ISM.XML), Need-To-Know
+    (NTK.XML), Access Rights and Handling (ARH), Trusted Data Format (TDF), IC-ID, IC-SF and IC-GENC.
+    This is the rare case where the provider IS the standards body for its sector. It is recorded as
+    NOT conformant on the catalogued surface for a precise reason: none of those markings appear anywhere
+    in the public content API, and ODNI no longer serves the schemas themselves.
+  standards:
+    - id: ic-ism
+      name: Information Security Marking Metadata (ISM.XML)
+      authored_by_this_provider: true
+      conforms: false
+      evidence: >-
+        No ISM attributes, classification markings or security-marking metadata appear on any record
+        returned by the public content API; the content is unclassified public affairs material. The
+        ODNI-published schema pages are themselves no longer served (see lifecycle/removed_surfaces).
+    - id: ic-ntk
+      name: Need-To-Know Metadata (NTK.XML)
+      authored_by_this_provider: true
+      conforms: false
+      evidence: Not present on the public surface; schema pages removed.
+    - id: ic-trusted-data-format
+      name: Trusted Data Format (TDF)
+      authored_by_this_provider: true
+      conforms: false
+      evidence: Not present on the public surface; schema pages removed.
+compliance_program:
+  published: false
+  certifications: []
+  trust_center: null
+  note: >-
+    ODNI publishes no trust center, no certification list and no compliance program page — it is a
+    federal agency, not a vendor, and is governed by statute and executive order rather than by
+    third-party audit certificates. No Compliance or TrustCenter pointer is wired, because no such
+    published program exists to point at.
+vulnerability_disclosure:
+  published: false
+  note: >-
+    Notable absence. CISA Binding Operational Directive 20-01 directs federal civilian agencies to
+    publish a vulnerability disclosure policy at a well-known location. Probed 2026-09-06:
+    /vulnerability-disclosure-policy, /vdp, /vulnerability-disclosure, /report-vulnerability and
+    /.well-known/security.txt all return a redirect to the site homepage. No Security or
+    VulnerabilityDisclosure pointer is wired.
+  evidence:
+    - {url: 'https://www.odni.gov/vulnerability-disclosure-policy', status: 302, followed: 'https://www.odni.gov/'}
+    - {url: 'https://www.odni.gov/.well-known/security.txt', status: 302, followed: 'https://www.odni.gov/'}

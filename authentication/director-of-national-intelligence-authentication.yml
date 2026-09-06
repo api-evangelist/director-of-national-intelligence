@@ -1,0 +1,37 @@
+generated: '2026-09-06'
+method: probed
+source: openapi/director-of-national-intelligence-wp-content-openapi.yml + live anonymous probes of https://www.odni.gov/?rest_route=/
+summary:
+  types: [none]
+  api_key_in: []
+  oauth2_flows: []
+  public_read: true
+  note: >-
+    The catalogued surface requires no authentication at all. Every operation in the derived OpenAPI was
+    called with no credential and returned HTTP 200 on 2026-09-06. ODNI issues no API keys, runs no
+    developer signup, and publishes no authentication documentation, because it publishes no developer
+    program.
+schemes: []
+public_surface:
+  scheme: none
+  evidence:
+    - {url: 'https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=3', status: 200, note: 'JSON returned with no Authorization header'}
+    - {url: 'https://www.odni.gov/?rest_route=/wp/v2/dlm_download&per_page=3', status: 200}
+    - {url: 'https://www.odni.gov/?rest_route=/', status: 200, note: 'route discovery document, 205 routes'}
+gated_surface:
+  note: >-
+    The same host advertises an authenticated write/administrative surface that is NOT part of the public
+    API and is not modelled in the OpenAPI. WordPress core supports Application Passwords (HTTP Basic over
+    TLS) and cookie authentication with an X-WP-Nonce header; the route index exposes
+    /wp/v2/users/{id}/application-passwords. Anonymous callers are refused.
+  schemes_advertised_by_platform:
+    - {name: WordPress Application Passwords, type: http, scheme: basic, note: 'WordPress core mechanism; not documented or offered to the public by ODNI'}
+    - {name: Cookie + X-WP-Nonce, type: apiKey, in: header, parameter: X-WP-Nonce, note: 'Advertised in Access-Control-Allow-Headers on every response'}
+  evidence:
+    - {url: 'https://www.odni.gov/?rest_route=/wp/v2/settings', status: 401, body: '{"code":"rest_forbidden","message":"Sorry, you are not allowed to do that.","data":{"status":401}}'}
+    - {header: 'Allow: GET', note: 'Collection responses advertise GET only for an anonymous caller'}
+    - {header: 'Access-Control-Allow-Headers: Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type'}
+docs: null
+docs_note: >-
+  ODNI publishes no authentication documentation. The upstream platform reference is
+  https://developer.wordpress.org/rest-api/using-the-rest-api/authentication/ — WordPress's, not ODNI's.

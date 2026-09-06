@@ -1,0 +1,119 @@
+generated: '2026-09-06'
+method: derived
+source: >-
+  openapi/director-of-national-intelligence-wp-content-openapi.yml plus the live record shapes saved in
+  examples/ (posts, downloads, types, taxonomies), read 2026-09-06
+note: >-
+  The entity graph of ODNI's public content API. Derived from real records, the registered type and
+  taxonomy documents, and the _links relations each record carries — not from documentation, because
+  ODNI publishes none. Identifiers are integers, not prefixed strings.
+identifiers:
+  style: integer
+  note: >-
+    Every entity is keyed by a plain WordPress integer id, and ids are shared across post types (a post,
+    a page, a media item and a download all draw from the same id space, so an id alone does not tell you
+    what it is — the `type` field does). Term ids are a separate space, and are NOT sequential from 1:
+    the four newsroom categories in use are 4, 5, 6 and 118, and /wp/v2/categories/1 returns 404.
+entities:
+  - name: Post
+    rest_base: /wp/v2/posts
+    operations: [listPosts, getPost]
+    count_observed: 156
+    description: An ODNI newsroom item — press release, remarks, interview or report.
+    fields: [id, date, date_gmt, modified, modified_gmt, slug, status, type, link, title, content, excerpt, author, featured_media, categories, tags, sticky, format, meta, class_list, guid, comment_status, ping_status, template]
+  - name: Page
+    rest_base: /wp/v2/pages
+    operations: [listPages, getPage]
+    description: A structural site page — About, Leadership, Newsroom, Transparency, Accountability, the NCTC/NCSC/OESET mission-center pages, the policy pages.
+    fields: [id, date, modified, slug, status, type, link, title, content, excerpt, author, featured_media, parent, menu_order, meta, template]
+  - name: Download
+    rest_base: /wp/v2/dlm_download
+    operations: [listDownloads, getDownload]
+    description: >-
+      A published ODNI document, managed by the Download Monitor plugin — transparency reports, Annual
+      Threat Assessments, IC directives, NCTC counterterrorism guides, declassified releases. This is the
+      closest thing ODNI has to a document catalog, and the most useful entity on the API.
+    fields: [id, date, date_gmt, modified, modified_gmt, slug, status, type, link, title, content, excerpt, author, featured, featured_media, download_count, dlm_download_category, dlm_download_tag, meta, template]
+    notable_fields:
+      - {field: download_count, note: 'Number of times the document has been downloaded — a genuine public usage signal ODNI does not publish anywhere else.'}
+      - {field: link, note: 'A /download/{id}/?tmstv=<epoch> URL that resolves to the file, not the file URL itself.'}
+      - {field: featured, note: 'Boolean; drives placement on the site.'}
+  - name: Media
+    rest_base: /wp/v2/media
+    operations: [listMedia, getMedia]
+    description: Uploads attached to posts, pages and downloads — images and PDFs.
+    fields: [id, date, slug, type, link, title, author, media_type, mime_type, source_url, media_details, post, alt_text, caption]
+  - name: Category
+    rest_base: /wp/v2/categories
+    operations: [listCategories, getCategory]
+    taxonomy: category
+    applies_to: [Post]
+    terms_in_use: [{id: 4, slug: press-releases, count: 55}, {id: 6, slug: remarks, count: 44}, {id: 118, slug: interviews, count: 46}, {id: 5, slug: reports, count: 11}]
+    fields: [id, count, description, link, name, slug, taxonomy, parent, meta]
+  - name: Tag
+    rest_base: /wp/v2/tags
+    operations: [listTags]
+    taxonomy: post_tag
+    applies_to: [Post]
+    terms_in_use: []
+    note: Registered but empty — the site classifies news with categories only.
+  - name: DownloadCategory
+    rest_base: /wp/v2/dlm_download_category
+    operations: [listDownloadCategories, getDownloadCategory]
+    taxonomy: dlm_download_category
+    applies_to: [Download]
+    note: 'In use — e.g. term 123 "Accountability". This is how the publications catalog is browsed.'
+  - name: DownloadTag
+    rest_base: /wp/v2/dlm_download_tag
+    operations: [listDownloadTags]
+    taxonomy: dlm_download_tag
+    applies_to: [Download]
+    terms_in_use: []
+    note: Registered but empty.
+  - name: Author
+    rest_base: /wp/v2/users
+    operations: [listAuthors, getAuthor]
+    description: An editorial account with at least one published record. A small number of shared accounts, not named ODNI officials.
+    fields: [id, name, url, description, link, slug, avatar_urls, meta]
+  - name: Comment
+    rest_base: /wp/v2/comments
+    operations: [listComments]
+    note: Registered but empty — comments are not enabled on ODNI content.
+  - name: Type
+    rest_base: /wp/v2/types
+    operations: [listTypes, getType]
+    description: Registered post-type definitions and the REST base each is served from. 16 registered; 4 carry public ODNI content.
+  - name: Taxonomy
+    rest_base: /wp/v2/taxonomies
+    operations: [listTaxonomies, getTaxonomy]
+    description: Registered taxonomy definitions and which types they apply to. 9 registered.
+  - name: SearchResult
+    rest_base: /wp/v2/search
+    operations: [search]
+    description: A thin cross-type projection — id, title, url, type, subtype only. Follow the id into the owning collection for the full record.
+relationships:
+  - {from: Post, to: Author, kind: belongs_to, via: author, note: 'integer user id; _links.author'}
+  - {from: Post, to: Category, kind: has_many, via: categories, note: 'array of term ids; _links.wp:term'}
+  - {from: Post, to: Tag, kind: has_many, via: tags}
+  - {from: Post, to: Media, kind: has_one, via: featured_media, note: '_links.wp:featuredmedia'}
+  - {from: Post, to: Media, kind: has_many, via: _links.wp:attachment}
+  - {from: Post, to: Comment, kind: has_many, via: _links.replies}
+  - {from: Post, to: Post, kind: has_many, via: _links.version-history, note: 'revisions; not public'}
+  - {from: Page, to: Page, kind: belongs_to, via: parent}
+  - {from: Page, to: Author, kind: belongs_to, via: author}
+  - {from: Page, to: Media, kind: has_one, via: featured_media}
+  - {from: Download, to: DownloadCategory, kind: has_many, via: dlm_download_category}
+  - {from: Download, to: DownloadTag, kind: has_many, via: dlm_download_tag}
+  - {from: Download, to: Author, kind: belongs_to, via: author}
+  - {from: Download, to: Media, kind: has_one, via: featured_media}
+  - {from: Download, to: Media, kind: has_many, via: _links.wp:attachment}
+  - {from: Media, to: Post, kind: belongs_to, via: post}
+  - {from: Category, to: Category, kind: belongs_to, via: parent}
+  - {from: DownloadCategory, to: Download, kind: has_many, via: 'reverse of dlm_download_category'}
+  - {from: Type, to: Taxonomy, kind: has_many, via: 'taxonomy.types[]'}
+traversal_warning: >-
+  The _links values on every record are written against https://www.odni.gov/wp-json/ , which the Akamai
+  edge 301s to the site homepage. Following a relation verbatim returns 187KB of HTML with HTTP 200. To
+  traverse this graph, rewrite each link into the query-string route form
+  (https://www.odni.gov/?rest_route=/wp/v2/...). See conventions/.
+render: null

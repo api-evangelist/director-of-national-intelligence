@@ -1,0 +1,77 @@
+generated: '2026-09-06'
+method: probed
+source: live GET of the named /.well-known/ path list on every host this record knows
+summary: >-
+  Nothing is served. www.odni.gov answers HTTP 302 to https://www.odni.gov/ for every unknown path —
+  including a negative-control path that cannot exist — so every /.well-known/ probe on the primary host
+  is a catch-all redirect to the homepage, not a document. odni.gov, www.dni.gov and dni.gov are
+  redirect-only hosts (dni.gov, the domain previously declared as ODNI's website, now 301s to odni.gov).
+  No security.txt, no api-catalog, no apis.json, no OIDC/OAuth metadata, no agent card, no llms.txt.
+  NO WellKnown, SecurityTxt or AgentCard pointer is wired in apis.yml, because none of these documents
+  exists. Recorded as an absence so a later sweep can show movement.
+hit_count: 0
+path_echo_control: passed
+soft_404_control:
+  path: /.well-known/dni-negative-control-7f3ab91c.json
+  host: www.odni.gov
+  status: 302
+  location: https://www.odni.gov/
+  followed_status: 200
+  followed_bytes: 187294
+  content_type: text/html
+  note: >-
+    A path that cannot exist returns the same 302-to-homepage as every real well-known path, so the host
+    is a catch-all. No 2xx on this host may be read as a served document.
+notes:
+  - >-
+    Federal vulnerability-disclosure paths were probed as well (CISA BOD 20-01 expects a published VDP):
+    /vulnerability-disclosure-policy, /vdp, /vulnerability-disclosure and /report-vulnerability all 302 to
+    the homepage. ODNI publishes no security.txt and no vulnerability disclosure policy on this host.
+  - >-
+    The Akamai edge in front of these hosts rejects browser-shaped User-Agent strings with HTTP 403 while
+    allowing plain clients through; every probe below was issued with a plain curl User-Agent.
+hosts:
+  - host: https://www.odni.gov
+    documents:
+      - {path: /.well-known/security.txt, status: 302, file: null}
+      - {path: /.well-known/openid-configuration, status: 302, file: null}
+      - {path: /.well-known/oauth-authorization-server, status: 302, file: null}
+      - {path: /.well-known/oauth-protected-resource, status: 302, file: null}
+      - {path: /.well-known/api-catalog, status: 302, file: null}
+      - {path: /.well-known/ai-plugin.json, status: 302, file: null}
+      - {path: /.well-known/ucp.json, status: 302, file: null}
+      - {path: /.well-known/acp.json, status: 302, file: null}
+      - {path: /.well-known/aauth-resource.json, status: 302, file: null}
+      - {path: /.well-known/apis.json, status: 302, file: null}
+      - {path: /apis.json, status: 302, file: null}
+      - {path: /apis.yml, status: 302, file: null}
+      - {path: /.well-known/agent-card.json, status: 302, file: null}
+      - {path: /.well-known/agent.json, status: 302, file: null}
+      - {path: /llms.txt, status: 302, file: null}
+  - host: https://odni.gov
+    documents:
+      - {path: /.well-known/security.txt, status: 301, file: null}
+      - {path: /.well-known/api-catalog, status: 301, file: null}
+      - {path: /.well-known/apis.json, status: 301, file: null}
+      - {path: /apis.json, status: 301, file: null}
+      - {path: /.well-known/agent-card.json, status: 301, file: null}
+      - {path: /.well-known/agent.json, status: 301, file: null}
+      - {path: /llms.txt, status: 301, file: null}
+  - host: https://www.dni.gov
+    documents:
+      - {path: /.well-known/security.txt, status: 301, file: null}
+      - {path: /.well-known/api-catalog, status: 301, file: null}
+      - {path: /.well-known/apis.json, status: 301, file: null}
+      - {path: /apis.json, status: 301, file: null}
+      - {path: /.well-known/agent-card.json, status: 301, file: null}
+      - {path: /.well-known/agent.json, status: 301, file: null}
+      - {path: /llms.txt, status: 301, file: null}
+  - host: https://dni.gov
+    documents:
+      - {path: /.well-known/security.txt, status: 301, file: null}
+      - {path: /.well-known/api-catalog, status: 301, file: null}
+      - {path: /.well-known/apis.json, status: 301, file: null}
+      - {path: /apis.json, status: 301, file: null}
+      - {path: /.well-known/agent-card.json, status: 301, file: null}
+      - {path: /.well-known/agent.json, status: 301, file: null}
+      - {path: /llms.txt, status: 301, file: null}

@@ -1,0 +1,84 @@
+generated: '2026-09-06'
+method: probed
+source: live probes of www.odni.gov, www.dni.gov and the legacy dni.gov IC-CIO paths (2026-09-06)
+versioning:
+  scheme: namespace-in-path
+  current: wp/v2
+  docs: null
+  policy_url: null
+  note: >-
+    The version is the WordPress namespace and moves with the site's WordPress upgrades. ODNI publishes
+    no versioning policy, makes no compatibility commitment, and gives no notice of change.
+deprecation:
+  policy_url: null
+  sunset_header: false
+  deprecation_header: false
+  note: >-
+    No deprecation policy, no RFC 8594 Sunset or Deprecation headers, no announcement channel. No
+    Deprecation pointer is wired in apis.yml, because no deprecation policy exists.
+sla:
+  url: null
+  uptime_target: null
+status_page: null
+status_page_note: >-
+  ODNI publishes no status page. No StatusPage pointer is wired in apis.yml. Probed status.odni.gov and
+  the site navigation; nothing exists.
+deprecated_operations: []
+domain_change:
+  event: Primary domain moved from dni.gov to odni.gov
+  observed: '2026-09-03'
+  reconfirmed: '2026-09-06'
+  detail: >-
+    https://www.dni.gov/ now returns HTTP 301 to https://www.odni.gov/ — a different registrable domain.
+    The apis.yml Website pointer was moved to https://www.odni.gov/ in this pass. dni.gov redirects are
+    in place at the domain root, but see removed_surfaces below: they do NOT preserve deep links.
+  evidence:
+    - {url: 'https://www.dni.gov/', status: 301, location: 'https://www.odni.gov/'}
+platform_change:
+  event: Site rebuilt on WordPress
+  detail: >-
+    www.odni.gov is now a WordPress site fronted by Akamai. The rebuild is what created the public
+    content API catalogued in this repo, and it is also what removed the IC technical specifications
+    below. The site advertises Download Monitor 5.1.14 as its document-management plugin.
+removed_surfaces:
+  - name: IC Technical Specifications (ISM.XML, NTK.XML, IC-ID.XML, IC-SF.XML, IC-Docbook.XML, ISMCAT, IC-GENC)
+    status: removed
+    severity: high
+    detail: >-
+      ODNI's IC Chief Information Officer published the Intelligence Community technical specifications —
+      real, machine-readable W3C XML Schemas released for public use without restriction — at
+      /index.php/who-we-are/organizations/ic-cio/ic-technical-specifications/... . Those pages no longer
+      exist. This was the only genuine specification-publishing program ODNI ran, and it is the single
+      largest loss in this record.
+    failure_mode: soft-404
+    failure_detail: >-
+      The legacy URLs do not 404 and do not redirect to a replacement. Every /index.php/who-we-are/...
+      path returns HTTP 200 serving the ODNI "About" page (211,285 bytes, <title>About - Office of the
+      Director of National Intelligence</title>) — confirmed with a negative-control path that cannot
+      exist, which returns the identical body. A link checker, a crawler or an agent reads these dead
+      specification URLs as live pages.
+    evidence:
+      - {url: 'https://www.dni.gov/index.php/who-we-are/organizations/ic-cio/ic-technical-specifications', status: 200, bytes: 211285, note: 'serves the About page'}
+      - {url: 'https://www.dni.gov/index.php/who-we-are/organizations/ic-cio/ic-technical-specifications/information-security-marking-metadata', status: 200, bytes: 211285, note: 'serves the About page'}
+      - {url: 'https://www.odni.gov/index.php/who-we-are/organizations/ic-cio/ic-technical-specifications/intelligence-community-identifier', status: 200, bytes: 211285, note: 'serves the About page'}
+      - {url: 'https://www.dni.gov/index.php/who-we-are/organizations/apievangelist-negative-control-7f3ab91c', status: 200, bytes: 211285, note: 'negative control — a path that cannot exist returns the same body'}
+      - {url: 'https://www.dni.gov/files/documents/ISM/CES/ISM.xml', status: 404, note: 'the file host does return a real 404'}
+    still_reachable_elsewhere:
+      - {source: 'crates.io ism / ism-data / ism-ismcat / ism-ic-genc', version: '20230609.0.0', published: '2026-05-09', official: false, note: 'third-party vendored copies of the June 2023 IC schema release'}
+      - {source: 'https://www.fincen.gov/base/Schema/ISM/IC-ISM.xsd', official: false, note: 'another federal agency mirroring IC-ISM.xsd inside its own schema tree'}
+    note: >-
+      Neither mirror is served by ODNI, so neither is recorded in this repo as an ODNI contract. Recorded
+      here as lifecycle evidence only.
+  - name: OpenGov / Open Government page
+    status: removed
+    detail: >-
+      The legacy /index.php/opengov page is gone with the rest of the old site; the rebuilt sitemap
+      contains no open-government, open-data, developer or API page of any kind.
+    evidence:
+      - {url: 'https://www.odni.gov/wp-sitemap-posts-page-1.xml', status: 200, note: '48 page URLs, none developer- or data-related'}
+change_signal:
+  best_available: 'the modified_gmt field on each record, and the RSS feed at https://www.odni.gov/feed/'
+  changelog: null
+  note: >-
+    ODNI runs no changelog or release notes for anything catalogued here. The RSS feed (536 items) is the
+    only dated, machine-readable publication stream, and it covers content rather than the API.

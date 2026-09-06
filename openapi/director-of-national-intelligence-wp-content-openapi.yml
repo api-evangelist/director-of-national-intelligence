@@ -1,0 +1,2455 @@
+openapi: 3.1.0
+info:
+  title: ODNI Public Content API (WordPress REST)
+  version: wp/v2
+  summary: The anonymous, read-only WordPress REST API serving www.odni.gov content — newsroom posts, site pages,
+    and the ODNI publications/downloads catalog.
+  description: 'The Office of the Director of National Intelligence publishes no developer program, no API documentation
+    and no machine-readable specification of its own. Its public website, www.odni.gov, runs on WordPress and serves
+    the standard WordPress REST API anonymously, and that surface is a real, callable, machine-readable read API
+    over ODNI content: 156 newsroom posts (press releases, remarks, interviews and reports), the site''s structural
+    pages, the media library, and — most usefully — the Download Monitor catalog of ODNI publications (transparency
+    reports, Annual Threat Assessments, IC directives, NCTC counterterrorism guides and declassified releases).
+
+
+    THIS DOCUMENT IS DERIVED, NOT PUBLISHED BY ODNI. Every path, method, parameter and parameter schema below comes
+    from the live WordPress route discovery document at https://www.odni.gov/?rest_route=/ , saved verbatim alongside
+    this file as director-of-national-intelligence-wp-routes-original.json (205 routes). Every path listed here
+    was individually confirmed to return HTTP 200 to an unauthenticated request on 2026-09-06; the confirming URL
+    and status are recorded on each operation as x-verified.
+
+
+    ACCESS QUIRK — THE PRETTY ROUTE IS BLOCKED AT THE EDGE. The canonical WordPress REST root https://www.odni.gov/wp-json/
+    and every path beneath it are answered with HTTP 301 to the site homepage by the site''s Akamai edge, so the
+    usual base URL does not work. The API is reachable only through WordPress''s alternate query-string route form:
+    prefix each path below with https://www.odni.gov/?rest_route= — for example https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=3
+    . The second entry in servers[] is that working prefix. The same edge answers every unknown path (including
+    /.well-known/*, /llms.txt and /openapi.json) with a 302 to the homepage, and rejects browser-shaped User-Agent
+    strings with 403 while allowing plain clients through.
+
+
+    WRITE METHODS AND ADMINISTRATIVE NAMESPACES ARE DELIBERATELY EXCLUDED. The route index advertises POST/PUT/PATCH/DELETE
+    and the wp/v2 administrative surface (settings, plugins, themes, widgets, templates, application-passwords)
+    plus plugin namespaces (download-monitor/v1, simple-history/v1, block-visibility/v1, wpchill/v1, duplicate-post/v1,
+    health-check/v1, wp-site-health/v1, wp-block-editor/v1, optimization-detective/v1, pgc_simply_gallery/v2). Those
+    exist on the host but require authentication — /wp/v2/settings returns 401 rest_forbidden anonymously, and collection
+    responses carry Allow: GET — so they are not a public API and are not modelled here. This is a content API.
+    It is not an intelligence-data API: no intelligence holdings, reporting or classified material is reachable
+    through it.'
+  contact:
+    name: ODNI Public Affairs
+    url: https://www.odni.gov/get-in-touch/
+  license:
+    name: U.S. Government Work (17 U.S.C. Sec. 105) — see ODNI website policies
+    url: https://www.odni.gov/policies/
+  x-provenance:
+    method: derived
+    source: https://www.odni.gov/?rest_route=/
+    derived: '2026-09-06'
+    verbatim_source_file: openapi/director-of-national-intelligence-wp-routes-original.json
+    note: Derived by API Evangelist from the live WordPress route discovery document served by www.odni.gov. Not
+      authored, published or endorsed by ODNI.
+servers:
+- url: https://www.odni.gov/wp-json
+  description: Canonical WordPress REST root. NOT CALLABLE as of 2026-09-06 — the Akamai edge answers 301 to https://www.odni.gov/
+    for /wp-json and every path beneath it.
+- url: https://www.odni.gov/?rest_route=
+  description: Working prefix. WordPress's alternate query-string route form; concatenate the operation path directly
+    after this URL (https://www.odni.gov/?rest_route=/wp/v2/posts). Verified 200 on 2026-09-06.
+security:
+- {}
+tags:
+- name: News
+  description: ODNI newsroom posts — press releases, remarks, interviews and reports.
+- name: Publications
+  description: The Download Monitor catalog of published ODNI documents.
+- name: Pages
+  description: Structural site pages.
+- name: Media
+  description: Media library uploads.
+- name: Taxonomy
+  description: Categories and tags classifying news and publications.
+- name: Search
+  description: Cross-type site search.
+- name: Discovery
+  description: Content types, taxonomies, statuses, authors and oEmbed.
+paths:
+  /wp/v2/posts:
+    get:
+      operationId: listPosts
+      summary: List ODNI news posts
+      description: Press releases, remarks, reports and interviews published to the ODNI newsroom. 156 records at
+        the time of harvest; classified with the `categories` taxonomy (press-releases, remarks, reports, interviews).
+      tags:
+      - News
+      security:
+      - {}
+      parameters:
+      - name: after
+        in: query
+        description: Limit response to posts published after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: author
+        in: query
+        description: Limit result set to posts assigned to specific authors.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: author_exclude
+        in: query
+        description: Ensure result set excludes posts assigned to specific authors.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: before
+        in: query
+        description: Limit response to posts published before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: categories
+        in: query
+        description: Limit result set to items with specific terms assigned in the categories taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: categories_exclude
+        in: query
+        description: Limit result set to items except those with specific terms assigned in the categories taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: format
+        in: query
+        description: Limit result set to items assigned one or more given formats.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - standard
+            - aside
+            - chat
+            - gallery
+            - link
+            - image
+            - quote
+            - status
+            - video
+            - audio
+      - name: ignore_sticky
+        in: query
+        description: Whether to ignore sticky posts or not.
+        required: false
+        schema:
+          type: boolean
+          default: true
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: modified_after
+        in: query
+        description: Limit response to posts modified after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: modified_before
+        in: query
+        description: Limit response to posts modified before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      - name: orderby
+        in: query
+        description: Sort collection by post attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - author
+          - date
+          - id
+          - include
+          - modified
+          - parent
+          - relevance
+          - slug
+          - include_slugs
+          - title
+          default: date
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: search_columns
+        in: query
+        description: Array of column names to be searched.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - post_title
+            - post_content
+            - post_excerpt
+          default: []
+      - name: search_semantics
+        in: query
+        description: How to interpret the search input.
+        required: false
+        schema:
+          type: string
+          enum:
+          - exact
+      - name: sticky
+        in: query
+        description: Limit result set to items that are sticky.
+        required: false
+        schema:
+          type: boolean
+      - name: tags
+        in: query
+        description: Limit result set to items with specific terms assigned in the tags taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: tags_exclude
+        in: query
+        description: Limit result set to items except those with specific terms assigned in the tags taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: tax_relation
+        in: query
+        description: Limit result set based on relationship between multiple taxonomies.
+        required: false
+        schema:
+          type: string
+          enum:
+          - AND
+          - OR
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-posts.json
+          headers:
+            X-WP-Total: &id003
+              description: Total number of matching records.
+              schema:
+                type: integer
+            X-WP-TotalPages: &id004
+              description: Total number of pages available at the current per_page.
+              schema:
+                type: integer
+            Link: &id005
+              description: RFC 8288 pagination links (rel="next" / rel="prev").
+              schema:
+                type: string
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: &id001
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPError'
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: &id002
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPError'
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=3
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/posts/{id}:
+    get:
+      operationId: getPost
+      summary: Retrieve one ODNI news post
+      description: Retrieve a single newsroom post by its WordPress id.
+      tags:
+      - News
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: WordPress post id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/posts/14092
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/pages:
+    get:
+      operationId: listPages
+      summary: List ODNI site pages
+      description: The site's structural pages — About, Leadership, Newsroom, Transparency, Accountability, the
+        NCTC/NCSC/OESET mission-center pages and the policy pages.
+      tags:
+      - Pages
+      security:
+      - {}
+      parameters:
+      - name: after
+        in: query
+        description: Limit response to posts published after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: author
+        in: query
+        description: Limit result set to posts assigned to specific authors.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: author_exclude
+        in: query
+        description: Ensure result set excludes posts assigned to specific authors.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: before
+        in: query
+        description: Limit response to posts published before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: menu_order
+        in: query
+        description: Limit result set to posts with a specific menu_order value.
+        required: false
+        schema:
+          type: integer
+      - name: modified_after
+        in: query
+        description: Limit response to posts modified after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: modified_before
+        in: query
+        description: Limit response to posts modified before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      - name: orderby
+        in: query
+        description: Sort collection by post attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - author
+          - date
+          - id
+          - include
+          - modified
+          - parent
+          - relevance
+          - slug
+          - include_slugs
+          - title
+          - menu_order
+          default: date
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: parent_exclude
+        in: query
+        description: Limit result set to all items except those of a particular parent ID.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: search_columns
+        in: query
+        description: Array of column names to be searched.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - post_title
+            - post_content
+            - post_excerpt
+          default: []
+      - name: search_semantics
+        in: query
+        description: How to interpret the search input.
+        required: false
+        schema:
+          type: string
+          enum:
+          - exact
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/pages&per_page=1
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/pages/{id}:
+    get:
+      operationId: getPage
+      summary: Retrieve one ODNI site page
+      description: Retrieve a single page by its WordPress id.
+      tags:
+      - Pages
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: WordPress page id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/pages/33
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/dlm_download:
+    get:
+      operationId: listDownloads
+      summary: List ODNI publications and downloads
+      description: The Download Monitor custom post type behind ODNI's published documents — transparency reports,
+        Annual Threat Assessments, IC directives, counterterrorism guides and declassified releases. This is the
+        closest thing on the site to a document catalog.
+      tags:
+      - Publications
+      security:
+      - {}
+      parameters:
+      - name: after
+        in: query
+        description: Limit response to posts published after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: before
+        in: query
+        description: Limit response to posts published before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: dlm_download_category
+        in: query
+        description: Limit result set to items with specific terms assigned in the dlm_download_category taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: dlm_download_category_exclude
+        in: query
+        description: Limit result set to items except those with specific terms assigned in the dlm_download_category
+          taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: dlm_download_tag
+        in: query
+        description: Limit result set to items with specific terms assigned in the dlm_download_tag taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: dlm_download_tag_exclude
+        in: query
+        description: Limit result set to items except those with specific terms assigned in the dlm_download_tag
+          taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: modified_after
+        in: query
+        description: Limit response to posts modified after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: modified_before
+        in: query
+        description: Limit response to posts modified before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      - name: orderby
+        in: query
+        description: Sort collection by post attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - author
+          - date
+          - id
+          - include
+          - modified
+          - parent
+          - relevance
+          - slug
+          - include_slugs
+          - title
+          default: date
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: search_columns
+        in: query
+        description: Array of column names to be searched.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - post_title
+            - post_content
+            - post_excerpt
+          default: []
+      - name: search_semantics
+        in: query
+        description: How to interpret the search input.
+        required: false
+        schema:
+          type: string
+          enum:
+          - exact
+      - name: tax_relation
+        in: query
+        description: Limit result set based on relationship between multiple taxonomies.
+        required: false
+        schema:
+          type: string
+          enum:
+          - AND
+          - OR
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-downloads.json
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download&per_page=3
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/dlm_download/{id}:
+    get:
+      operationId: getDownload
+      summary: Retrieve one ODNI publication
+      description: Retrieve a single publication/download record by id.
+      tags:
+      - Publications
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Download id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download/14142
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/dlm_download_category:
+    get:
+      operationId: listDownloadCategories
+      summary: List publication categories
+      description: Taxonomy terms classifying ODNI publications (Accountability, Transparency, NCTC, NCSC, reports
+        and similar).
+      tags:
+      - Taxonomy
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: hide_empty
+        in: query
+        description: Whether to hide terms not assigned to any posts.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      - name: orderby
+        in: query
+        description: Sort collection by term attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - id
+          - include
+          - name
+          - slug
+          - include_slugs
+          - term_group
+          - description
+          - count
+          default: name
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: post
+        in: query
+        description: Limit result set to terms assigned to a specific post.
+        required: false
+        schema:
+          type: integer
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-download-categories.json
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download_category&per_page=100
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/dlm_download_category/{id}:
+    get:
+      operationId: getDownloadCategory
+      summary: Retrieve one publication category
+      description: Retrieve a single publication-category term by id.
+      tags:
+      - Taxonomy
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Term id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download_category/123
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/dlm_download_tag:
+    get:
+      operationId: listDownloadTags
+      summary: List publication tags
+      description: Tag terms on ODNI publications. Empty at the time of harvest (the site classifies with categories
+        only).
+      tags:
+      - Taxonomy
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: hide_empty
+        in: query
+        description: Whether to hide terms not assigned to any posts.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      - name: orderby
+        in: query
+        description: Sort collection by term attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - id
+          - include
+          - name
+          - slug
+          - include_slugs
+          - term_group
+          - description
+          - count
+          default: name
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: post
+        in: query
+        description: Limit result set to terms assigned to a specific post.
+        required: false
+        schema:
+          type: integer
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download_tag
+        status: 200
+        date: '2026-09-06'
+        note: returned an empty array
+  /wp/v2/categories:
+    get:
+      operationId: listCategories
+      summary: List newsroom categories
+      description: 'The four newsroom categories in use: press-releases (55), remarks (44), interviews (46) and
+        reports (11), counted at harvest.'
+      tags:
+      - Taxonomy
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: hide_empty
+        in: query
+        description: Whether to hide terms not assigned to any posts.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      - name: orderby
+        in: query
+        description: Sort collection by term attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - id
+          - include
+          - name
+          - slug
+          - include_slugs
+          - term_group
+          - description
+          - count
+          default: name
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: post
+        in: query
+        description: Limit result set to terms assigned to a specific post.
+        required: false
+        schema:
+          type: integer
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-categories.json
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/categories&per_page=100
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/categories/{id}:
+    get:
+      operationId: getCategory
+      summary: Retrieve one newsroom category
+      description: Retrieve a single newsroom category term by id.
+      tags:
+      - Taxonomy
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Term id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/categories/4
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/tags:
+    get:
+      operationId: listTags
+      summary: List newsroom tags
+      description: Post tag terms. Empty at the time of harvest.
+      tags:
+      - Taxonomy
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: hide_empty
+        in: query
+        description: Whether to hide terms not assigned to any posts.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      - name: orderby
+        in: query
+        description: Sort collection by term attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - id
+          - include
+          - name
+          - slug
+          - include_slugs
+          - term_group
+          - description
+          - count
+          default: name
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: post
+        in: query
+        description: Limit result set to terms assigned to a specific post.
+        required: false
+        schema:
+          type: integer
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/tags
+        status: 200
+        date: '2026-09-06'
+        note: returned an empty array
+  /wp/v2/media:
+    get:
+      operationId: listMedia
+      summary: List media library items
+      description: Images, PDFs and other uploads attached to ODNI pages and posts.
+      tags:
+      - Media
+      security:
+      - {}
+      parameters:
+      - name: after
+        in: query
+        description: Limit response to posts published after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: author
+        in: query
+        description: Limit result set to posts assigned to specific authors.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: author_exclude
+        in: query
+        description: Ensure result set excludes posts assigned to specific authors.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: before
+        in: query
+        description: Limit response to posts published before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: media_type
+        in: query
+        description: Limit result set to attachments of a particular media type.
+        required: false
+        schema:
+          type: string
+          enum:
+          - image
+          - video
+          - text
+          - application
+          - audio
+      - name: mime_type
+        in: query
+        description: Limit result set to attachments of a particular MIME type.
+        required: false
+        schema:
+          type: string
+      - name: modified_after
+        in: query
+        description: Limit response to posts modified after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: modified_before
+        in: query
+        description: Limit response to posts modified before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      - name: orderby
+        in: query
+        description: Sort collection by post attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - author
+          - date
+          - id
+          - include
+          - modified
+          - parent
+          - relevance
+          - slug
+          - include_slugs
+          - title
+          default: date
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: parent_exclude
+        in: query
+        description: Limit result set to all items except those of a particular parent ID.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: search_columns
+        in: query
+        description: Array of column names to be searched.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - post_title
+            - post_content
+            - post_excerpt
+          default: []
+      - name: search_semantics
+        in: query
+        description: How to interpret the search input.
+        required: false
+        schema:
+          type: string
+          enum:
+          - exact
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/media&per_page=1
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/media/{id}:
+    get:
+      operationId: getMedia
+      summary: Retrieve one media item
+      description: Retrieve a single media record by id.
+      tags:
+      - Media
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Media id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/media/13013
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/search:
+    get:
+      operationId: search
+      summary: Search ODNI content
+      description: Cross-type search over posts, pages and publications. Returns id, title, url, type and subtype
+        only.
+      tags:
+      - Search
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: subtype
+        in: query
+        description: Limit results to items of one or more object subtypes.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - post
+            - page
+            - pgc_simply_gallery
+            - upcp_product
+            - category
+            - post_tag
+            - dlm_download_category
+            - dlm_download_tag
+            - pgc_simply_category
+            - upcp-product-category
+            - upcp-product-tag
+            - any
+          default: any
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-search.json
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/search&search=annual+threat+assessment&per_page=5
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/types:
+    get:
+      operationId: listTypes
+      summary: List content types
+      description: The registered post types on the site and the REST base each is served from.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-types.json
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/types
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/types/{type}:
+    get:
+      operationId: getType
+      summary: Retrieve one content type
+      description: Retrieve the definition of a single post type.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: type
+        in: path
+        required: true
+        description: Post type slug (e.g. `post`, `page`, `dlm_download`).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/types/post
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/taxonomies:
+    get:
+      operationId: listTaxonomies
+      summary: List taxonomies
+      description: The registered taxonomies and their REST bases.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-taxonomies.json
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/taxonomies
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/taxonomies/{taxonomy}:
+    get:
+      operationId: getTaxonomy
+      summary: Retrieve one taxonomy
+      description: Retrieve the definition of a single taxonomy.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: taxonomy
+        in: path
+        required: true
+        description: Taxonomy slug (e.g. `category`, `dlm_download_category`).
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/taxonomies/category
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/statuses:
+    get:
+      operationId: listStatuses
+      summary: List post statuses
+      description: The publish statuses visible to an anonymous caller.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/statuses
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/users:
+    get:
+      operationId: listAuthors
+      summary: List content authors
+      description: Authors with at least one published record. The site publishes under a small number of editorial
+        accounts.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: capabilities
+        in: query
+        description: Limit result set to users matching at least one specific capability provided. Accepts csv list
+          or single capability.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: has_published_posts
+        in: query
+        description: Limit result set to users who have published posts.
+        required: false
+        schema:
+          type: boolean
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: asc
+      - name: orderby
+        in: query
+        description: Sort collection by user attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - id
+          - include
+          - name
+          - registered_date
+          - slug
+          - include_slugs
+          - email
+          - url
+          default: name
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: roles
+        in: query
+        description: Limit result set to users matching at least one specific role provided. Accepts csv list or
+          single role.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: search_columns
+        in: query
+        description: Array of column names to be searched.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - email
+            - name
+            - id
+            - username
+            - slug
+          default: []
+      - name: who
+        in: query
+        description: Limit result set to users who are considered authors.
+        required: false
+        schema:
+          type: string
+          enum:
+          - authors
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/users&per_page=1
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/users/{id}:
+    get:
+      operationId: getAuthor
+      summary: Retrieve one author
+      description: Retrieve a single author record by id.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: User id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/users/25
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/comments:
+    get:
+      operationId: listComments
+      summary: List comments
+      description: Comment records. Empty at the time of harvest — comments are not enabled on ODNI content.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: after
+        in: query
+        description: Limit response to comments published after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: author
+        in: query
+        description: Limit result set to comments assigned to specific user IDs. Requires authorization.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+      - name: author_email
+        in: query
+        description: Limit result set to that from a specific author email. Requires authorization.
+        required: false
+        schema:
+          type: string
+          format: email
+      - name: author_exclude
+        in: query
+        description: Ensure result set excludes comments assigned to specific user IDs. Requires authorization.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+      - name: before
+        in: query
+        description: Limit response to comments published before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      - name: orderby
+        in: query
+        description: Sort collection by comment attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - date
+          - date_gmt
+          - id
+          - include
+          - post
+          - parent
+          - type
+          default: date_gmt
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: parent_exclude
+        in: query
+        description: Ensure result set excludes specific parent IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: password
+        in: query
+        description: The password for the post if it is password protected.
+        required: false
+        schema:
+          type: string
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: post
+        in: query
+        description: Limit result set to comments assigned to specific post IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+          headers:
+            X-WP-Total: *id003
+            X-WP-TotalPages: *id004
+            Link: *id005
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/comments
+        status: 200
+        date: '2026-09-06'
+        note: returned an empty array
+  /oembed/1.0/embed:
+    get:
+      operationId: oembed
+      summary: oEmbed representation of an ODNI URL
+      description: oEmbed 1.0 provider endpoint for any ODNI page or post URL.
+      tags:
+      - Discovery
+      security:
+      - {}
+      parameters:
+      - name: format
+        in: query
+        description: WordPress REST parameter `format`.
+        required: false
+        schema:
+          type: string
+          default: json
+      - name: maxwidth
+        in: query
+        description: WordPress REST parameter `maxwidth`.
+        required: false
+        schema:
+          type: string
+          default: 600
+      - name: url
+        in: query
+        description: The URL of the resource for which to fetch oEmbed data.
+        required: true
+        schema:
+          type: string
+          format: uri
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming
+            the offending parameters.
+          content: *id001
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content: *id002
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/oembed/1.0/embed&url=https%3A%2F%2Fwww.odni.gov%2F
+        status: 200
+        date: '2026-09-06'
+components:
+  schemas:
+    WPCollection:
+      type: array
+      description: A page of WordPress REST records. Page size is controlled by per_page (1-100, default 10) and
+        page; the total count and page count are returned in the X-WP-Total and X-WP-TotalPages response headers.
+      items:
+        type: object
+    WPObject:
+      type: object
+      description: A single WordPress REST record.
+    WPError:
+      type: object
+      description: The WordPress REST error envelope. This API does NOT use RFC 9457 application/problem+json; errors
+        are returned as application/json with this shape.
+      required:
+      - code
+      - message
+      - data
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code, e.g. rest_invalid_param, rest_no_route, rest_post_invalid_id,
+            rest_forbidden.
+        message:
+          type: string
+          description: Human-readable message.
+        data:
+          type: object
+          properties:
+            status:
+              type: integer
+              description: The HTTP status, repeated in the body.
+            params:
+              type: object
+              description: 'Present on rest_invalid_param: a map of offending parameter name to explanation.'
+            details:
+              type: object
+              description: 'Present on rest_invalid_param: per-parameter code/message/data detail.'

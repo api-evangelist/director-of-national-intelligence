@@ -1,0 +1,42 @@
+generated: '2026-09-06'
+method: probed
+source: live response headers from https://www.odni.gov/?rest_route=/wp/v2/posts (2026-09-06)
+limit_count: 0
+note: >-
+  ODNI documents no rate limits, and the API returns no rate-limit signalling of any kind. A live
+  unauthenticated response carries no X-RateLimit-*, no RateLimit-* (RFC 9239 draft), no Retry-After and
+  no quota header. There is no developer portal or terms page stating a call ceiling. An agent has no
+  runtime signal to back off on; the only observable throttle is whatever the Akamai edge in front of the
+  origin applies silently. The robots.txt on the same host asks non-SearchGov crawlers for a 10-second
+  crawl delay, which is a courtesy request to crawlers rather than an API limit, and is recorded below as
+  the only published pacing guidance that exists.
+limits: []
+response_headers:
+  rate_limit_headers_present: false
+  observed:
+    - {header: X-WP-Total, value: '156', note: 'pagination, not rate limiting'}
+    - {header: X-WP-TotalPages, value: '78', note: 'pagination, not rate limiting'}
+    - {header: Link, note: 'RFC 8288 rel="next" / rel="prev"'}
+    - {header: 'Cache-Control', value: 'private, no-cache'}
+    - {header: 'Allow', value: 'GET'}
+  absent: [X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset, RateLimit-Limit, RateLimit-Remaining, RateLimit-Reset, Retry-After]
+exhaustion_status: unknown
+pagination_ceiling:
+  parameter: per_page
+  min: 1
+  max: 100
+  default: 10
+  evidence:
+    url: 'https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=999'
+    status: 400
+    body: '{"code":"rest_invalid_param","message":"Invalid parameter(s): per_page","data":{"status":400,"params":{"per_page":"per_page must be between 1 (inclusive) and 100 (inclusive)"}}}'
+crawl_guidance:
+  source: https://www.odni.gov/robots.txt
+  status: 200
+  directives:
+    - {user_agent: usasearch, crawl_delay: 2}
+    - {user_agent: '*', crawl_delay: 10}
+  note: Applies to crawlers; ODNI states no API-specific limit.
+evidence:
+  - {url: 'https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=2', status: 200, checked: '2026-09-06'}
+  - {url: 'https://www.odni.gov/robots.txt', status: 200, checked: '2026-09-06'}

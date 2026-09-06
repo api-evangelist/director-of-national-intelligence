@@ -1,14 +1,14 @@
-generated: '2026-07-11'
+generated: '2026-09-06'
 method: probed
 source: live DNS/TLS/HTTP probes of apis.yml + OpenAPI hosts
 hosts:
-- host: www.dni.gov
+- host: www.odni.gov
   https: true
   tls_version: TLSv1.3
   cert_expires: Nov 11 23:59:59 2026 GMT
   hsts: null
 domains:
-- domain: dni.gov
+- domain: odni.gov
   dnssec: true
   caa: []
   spf: true

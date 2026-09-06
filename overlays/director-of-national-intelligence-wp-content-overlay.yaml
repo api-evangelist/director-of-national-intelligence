@@ -1,0 +1,40 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enhancements for the ODNI Public Content API
+  version: 1.0.0
+extends: openapi/director-of-national-intelligence-wp-content-openapi.yml
+x-provenance:
+  generated: '2026-09-06'
+  method: generated
+  source: >-
+    Records what API Evangelist added on top of ODNI's WordPress route discovery document. ODNI publishes
+    no specification, so the base document is itself derived; this overlay captures the layer of naming,
+    grouping and operational warnings that came from our probing rather than from the route index.
+actions:
+  - target: $.info
+    update:
+      x-apievangelist-enrichment: '2026-09-06'
+      x-apievangelist-note: >-
+        Base document derived from https://www.odni.gov/?rest_route=/ ; ODNI publishes no OpenAPI. Every
+        operation confirmed 200 anonymously on 2026-09-06.
+  - target: $.info
+    update:
+      x-access-warning: >-
+        The canonical WordPress base https://www.odni.gov/wp-json is 301'd to the site homepage by the
+        Akamai edge, and browser-shaped User-Agent strings are refused with 403. Call
+        https://www.odni.gov/?rest_route=/... with a plain User-Agent.
+  - target: $.paths['/wp/v2/dlm_download'].get
+    update:
+      x-apievangelist-highlight: >-
+        The most valuable operation on this API — ODNI's published-document catalog, including a
+        download_count field that is a public usage signal available nowhere else on odni.gov.
+  - target: $.paths['/wp/v2/posts'].get
+    update:
+      x-apievangelist-highlight: >-
+        The full ODNI newsroom as structured records: press releases, remarks, interviews and reports,
+        with modified_gmt as the only reliable change signal (no ETag, no Last-Modified).
+  - target: $.components.schemas.WPError
+    update:
+      x-apievangelist-note: >-
+        Not RFC 9457. Catalogued with observed codes and reproducing requests in
+        errors/director-of-national-intelligence-problem-types.yml.

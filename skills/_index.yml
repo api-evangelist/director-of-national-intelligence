@@ -1,0 +1,17 @@
+generated: '2026-09-06'
+method: generated
+source: >-
+  openapi/director-of-national-intelligence-wp-content-openapi.yml, conventions/, errors/ and lifecycle/.
+  Every operationId referenced below exists verbatim in the OpenAPI. ODNI publishes no AGENTS.md and no
+  skill files; searched 2026-09-06.
+skills:
+  - file: director-of-national-intelligence-track-odni-newsroom.md
+    name: Track the ODNI newsroom
+    description: Pull ODNI press releases, remarks, interviews and reports as structured records, and poll for new ones.
+    api: openapi/director-of-national-intelligence-wp-content-openapi.yml
+    operations: [listCategories, listPosts, getPost]
+  - file: director-of-national-intelligence-harvest-odni-publications.md
+    name: Harvest the ODNI publications catalog
+    description: Enumerate ODNI's published documents with their categories, download links and download counts.
+    api: openapi/director-of-national-intelligence-wp-content-openapi.yml
+    operations: [listDownloadCategories, listDownloads, getDownload, listMedia]

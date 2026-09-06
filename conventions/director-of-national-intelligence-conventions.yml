@@ -1,0 +1,119 @@
+generated: '2026-09-06'
+method: probed
+source: >-
+  live responses from https://www.odni.gov/?rest_route=/wp/v2/* (2026-09-06) plus the verbatim route
+  discovery document at openapi/director-of-national-intelligence-wp-routes-original.json
+summary: >-
+  A standard WordPress REST API served anonymously and read-only. Conventions below are the WordPress
+  platform's, observed live on ODNI's host — ODNI documents none of them itself.
+authentication:
+  style: none
+  detail: No credential is required or accepted on the public surface. See authentication/.
+routing:
+  canonical_base: https://www.odni.gov/wp-json
+  canonical_base_status: 301
+  canonical_base_note: >-
+    The canonical WordPress REST root and every path under it are 301'd to the site homepage by the
+    Akamai edge. This is the single most important convention on this API: the documented WordPress base
+    URL does not work here.
+  working_base: https://www.odni.gov/?rest_route=/
+  working_base_status: 200
+  working_base_note: >-
+    WordPress's alternate query-string route form. Append the route to the parameter value, e.g.
+    https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=3 . Additional query parameters are appended
+    with & as normal.
+  user_agent_note: >-
+    The edge answers HTTP 403 (AkamaiGHost "Access Denied") to browser-shaped User-Agent strings and
+    serves plain clients (curl/*) normally. A client that spoofs a browser UA is blocked; one that does
+    not is served.
+pagination:
+  style: page-and-size
+  params:
+    - {name: page, type: integer, default: 1, minimum: 1}
+    - {name: per_page, type: integer, default: 10, minimum: 1, maximum: 100}
+    - {name: offset, type: integer, note: 'supported on post-type collections'}
+    - {name: order, type: string, enum: [asc, desc]}
+    - {name: orderby, type: string, note: 'date, id, title, slug, relevance and others per collection'}
+  response_headers: [X-WP-Total, X-WP-TotalPages, Link]
+  link_header: RFC 8288 rel="next" / rel="prev"
+  exceeded_behaviour: 'per_page > 100 returns HTTP 400 rest_invalid_param'
+  evidence: {url: 'https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=2', status: 200, headers: {X-WP-Total: '156', X-WP-TotalPages: '78'}}
+field_selection:
+  supported: true
+  params:
+    - {name: _fields, note: 'comma-separated allow-list of top-level fields to return'}
+    - {name: _embed, note: 'inline embedded resources referenced from _links'}
+    - {name: _envelope, note: 'wrap body, status and headers into a single JSON envelope'}
+  note: Platform-standard WordPress sparse-fieldset support; not documented by ODNI.
+filtering:
+  note: >-
+    Collections accept search, slug, include, exclude, before, after, modified_before, modified_after,
+    author, categories, tags and status filters, with the exact set per collection taken from the route
+    discovery document and reproduced in the derived OpenAPI.
+hypermedia:
+  style: HAL-ish _links
+  detail: >-
+    Every record carries a _links object with self, collection, about, author, replies, wp:attachment and
+    curies entries, so the surface is walkable without documentation. Note that the _links values are
+    written with the /wp-json/ base, which is 301'd at the edge — following a _link verbatim fails, and
+    the route must be rewritten into the ?rest_route= form.
+metadata:
+  supported: true
+  note: WordPress `meta` object per record; ODNI exposes no custom registered meta fields on the public surface.
+request_tracing:
+  request_id_header: null
+  note: >-
+    No request-id or correlation header is returned. Responses carry Akamai server-timing (ak_p) values,
+    which are edge diagnostics rather than a stable request identifier.
+versioning:
+  scheme: namespace-in-path
+  current: wp/v2
+  namespaces_advertised: 12
+  note: >-
+    Version is the WordPress namespace (wp/v2). ODNI publishes no versioning policy and makes no
+    commitment about the surface; the version moves when the site's WordPress is upgraded.
+error_envelope:
+  format: wordpress-rest
+  rfc9457: false
+  media_type: application/json
+  shape: '{"code": "<machine code>", "message": "<human text>", "data": {"status": <http status>, "params": {...}, "details": {...}}}'
+  see: errors/director-of-national-intelligence-problem-types.yml
+rate_limit_signaling:
+  headers: none
+  see: rate-limits/director-of-national-intelligence-rate-limits.yml
+caching:
+  cache_control: 'private, no-cache'
+  etag: false
+  conditional_requests: false
+  note: >-
+    The origin sends Cache-Control: private, no-cache and no ETag or Last-Modified on API responses, so
+    conditional requests are not available. Records do carry a `modified_gmt` field, which is the only
+    available change signal and is the practical way to poll for new content.
+cors:
+  access_control_allow_headers: 'Authorization, X-WP-Nonce, Content-Disposition, Content-MD5, Content-Type'
+  access_control_expose_headers: 'X-WP-Total, X-WP-TotalPages, Link'
+idempotency:
+  coverage: na
+  mechanism: none
+  scope: []
+  note: >-
+    NOT APPLICABLE, not absent. The public surface is read-only — every catalogued operation is a GET,
+    and collection responses advertise `Allow: GET` to an anonymous caller, so there is no mutating
+    surface for an idempotency key to protect. /wp/v2/settings returns 401 rest_forbidden anonymously.
+    An `na` here leaves the denominator rather than scoring a zero the provider did not earn.
+dry_run_mode:
+  supported: na
+  note: Read-only surface; nothing to rehearse.
+reversibility:
+  grade: na
+  note: >-
+    NOT APPLICABLE. There is no write surface on the public API, so there is no action to take back. No
+    reversal operation, window or restore path exists or is needed. Recorded explicitly rather than left
+    blank so the dimension leaves the denominator instead of scoring zero.
+  write_surfaces: []
+cross_links:
+  authentication: authentication/director-of-national-intelligence-authentication.yml
+  errors: errors/director-of-national-intelligence-problem-types.yml
+  lifecycle: lifecycle/director-of-national-intelligence-lifecycle.yml
+  rate_limits: rate-limits/director-of-national-intelligence-rate-limits.yml
+  data_model: data-model/director-of-national-intelligence-data-model.yml

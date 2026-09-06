@@ -1,58 +1,158 @@
 aid: director-of-national-intelligence
-url: >-
-  https://raw.githubusercontent.com/api-evangelist/director-of-national-intelligence/main/apis.yml
+url: https://raw.githubusercontent.com/api-evangelist/director-of-national-intelligence/main/apis.yml
 name: Director of National Intelligence
-description: >-
-  The Office of the Director of National Intelligence leads intelligence
-  integration and forges an intelligence community that delivers the most
-  insightful intelligence possible. The ODNI serves as the head of the
-  intelligence community, overseeing and coordinating the foreign and domestic
-  activities of the US intelligence community.
+description: The Office of the Director of National Intelligence (ODNI) leads intelligence integration
+  across the United States Intelligence Community. The DNI serves as head of the IC, principal intelligence
+  adviser to the President, and oversees and coordinates the foreign and domestic activities of the 18
+  IC elements. ODNI houses the National Counterterrorism Center, the National Counterintelligence and
+  Security Center, the Office of Economic Security and Emerging Technologies, the Mission Integration
+  and Policy & Capabilities directorates, and the IC Inspector General. ODNI publishes no developer program
+  and no machine-readable specification of its own; its public content — newsroom press releases, remarks,
+  interviews, the Annual Threat Assessment, the annual IC transparency reports, IC directives and NCTC
+  counterterrorism guides — is served from a WordPress site at www.odni.gov whose REST API answers anonymously
+  and is catalogued here.
 type: Index
 deliveryModel:
-  model: unknown
+  model: hosted-api
   open_source: false
   commercial: false
-  callable_host: false
-  label: Delivery model not determined — needs a product licence on record
-  confidence: low
+  callable_host: true
+  label: Government-hosted public content API — callable, free, no commercial offering
+  confidence: medium
+  generated: '2026-09-06'
+  method: probed
   source:
-  - none
-  generated: '2026-08-28'
-  method: derived
+  - url: https://www.odni.gov/?rest_route=/
+    status: 200
+    note: WordPress REST route discovery document, 205 routes, served anonymously
 accessModel:
-  pricing: unknown
-  onboarding: unknown
+  pricing: free
+  onboarding: none
   trial: false
-  try_now: false
-  public: false
-  label: Unknown
-  confidence: low
-  source: []
-  generated: '2026-07-22'
-  method: derived
+  try_now: true
+  public: true
+  label: Free and open — anonymous, unauthenticated public read API; no signup, no key, no plans
+  confidence: medium
+  generated: '2026-09-06'
+  method: probed
   source:
-  - {url: 'https://www.dni.gov/', status: 301, note: 'declared website redirects to https://www.odni.gov/ — a different registrable domain (dni.gov -> odni.gov), possible rename or acquisition (probed 2026-09-03, roadmap#169)'}
+  - url: https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=3
+    status: 200
+    note: returns JSON anonymously with no credential of any kind (probed 2026-09-06)
+  - url: https://www.dni.gov/
+    status: 301
+    note: the previously declared website redirects to https://www.odni.gov/ — a different registrable
+      domain (dni.gov -> odni.gov); Website pointer moved to odni.gov on 2026-09-06
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/director-of-national-intelligence.png
 tags:
-  - Federal-Government
-  - Intelligence
+- Federal-Government
+- Intelligence
+- National-Security
+- Government
+- Public-Sector
+- Transparency
+- News
+- Publications
 tags_raw:
-  - Federal Government
-  - Intelligence
+- Federal Government
+- Intelligence
+- National Security
+- Government
+- Public Sector
+- Transparency
+- News
+- Publications
 access: 3rd-Party
 created: '2024-07-11'
-modified: '2026-04-28'
-position: Consuming
+modified: '2026-09-06'
+position: Producing
 specificationVersion: '0.23'
-apis: []
+apis:
+- aid: director-of-national-intelligence:odni-public-content-api
+  name: ODNI Public Content API
+  description: The anonymous, read-only WordPress REST API behind www.odni.gov. Serves ODNI newsroom posts
+    (press releases, remarks, interviews and reports), the site's structural pages, the media library,
+    and the Download Monitor catalog of published ODNI documents. DERIVED description — ODNI publishes
+    no specification; the OpenAPI here was derived from the live route discovery document and every operation
+    was confirmed 200 anonymously on 2026-09-06. The canonical /wp-json/ root is 301'd to the homepage
+    by the site's Akamai edge, so the API is reachable only through the query-string route form https://www.odni.gov/?rest_route=/...
+    . Content only — no intelligence holdings are exposed.
+  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/director-of-national-intelligence.png
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - News
+  - Publications
+  - Content
+  - Government
+  - Transparency
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-wp-content-openapi.yml
+  - type: Overlay
+    url: overlays/director-of-national-intelligence-wp-content-overlay.yaml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
 common:
-  - type: DomainSecurity
-    url: security/director-of-national-intelligence-domain-security.yml
-  - type: LinkedIn
-    url: https://www.linkedin.com/company/odni
-  - type: Website
-    url: https://www.dni.gov/
+- type: OpenAPI
+  url: openapi/director-of-national-intelligence-wp-content-openapi.yml
+- type: Authentication
+  url: authentication/director-of-national-intelligence-authentication.yml
+- type: Conventions
+  url: conventions/director-of-national-intelligence-conventions.yml
+- type: ErrorCatalog
+  url: errors/director-of-national-intelligence-problem-types.yml
+- type: Lifecycle
+  url: lifecycle/director-of-national-intelligence-lifecycle.yml
+- type: Conformance
+  url: conformance/director-of-national-intelligence-conformance.yml
+- type: DataModel
+  url: data-model/director-of-national-intelligence-data-model.yml
+- type: RateLimits
+  url: rate-limits/director-of-national-intelligence-rate-limits.yml
+- type: Plans
+  url: plans/director-of-national-intelligence-plans-pricing.yml
+- type: Packages
+  url: packages/director-of-national-intelligence-packages.yml
+- type: X-MCPServerCandidate
+  url: mcp/director-of-national-intelligence-mcp.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: LLMsTxt
+  url: llms/director-of-national-intelligence-llms.txt
+- type: Overlay
+  url: overlays/director-of-national-intelligence-wp-content-overlay.yaml
+- type: DomainSecurity
+  url: security/director-of-national-intelligence-domain-security.yml
+- type: Website
+  url: https://www.odni.gov/
+- type: Blog
+  url: https://www.odni.gov/newsroom/
+- type: BlogRSS
+  url: https://www.odni.gov/feed/
+- type: PrivacyPolicy
+  url: https://www.odni.gov/policies/
+- type: Support
+  url: https://www.odni.gov/get-in-touch/
+- type: LinkedIn
+  url: https://www.linkedin.com/company/odni
 maintainers:
-  - FN: Kin Lane
-    email: kin@apievangelist.com
+- FN: Kin Lane
+  email: kin@apievangelist.com
+x-enrichment:
+  date: '2026-09-06'
+  status: enriched
+  artifacts_added: 25
+  pass: local-v3

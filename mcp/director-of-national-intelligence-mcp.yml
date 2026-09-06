@@ -1,0 +1,65 @@
+generated: '2026-09-06'
+method: derived
+status: candidate
+source: openapi/director-of-national-intelligence-wp-content-openapi.yml
+summary: >-
+  No official hosted or remote Model Context Protocol server exists for ODNI, and none should be implied.
+  Searched the ODNI site, the site's own route index (no mcp namespace), npm @modelcontextprotocol, the
+  public MCP registries, and every ODNI-shaped hostname; nothing exists. ODNI has no verifiable GitHub
+  organization. The tools below are DERIVED by API Evangelist from the public content API as a proposal
+  only. They are not published by ODNI. The apis.yml pointer is type X-MCPServerCandidate, NOT MCPServer,
+  because no server exists.
+deployment:
+  mode: none
+  endpoint: null
+  install: null
+  package: null
+  auth: none
+  verified: derived
+  note: >-
+    mode is none because nobody ships a server — neither a remote endpoint nor a stdio package. No
+    endpoint URL is invented here; a guessed MCP path that happened to answer would read as a verified
+    agent surface, which would be the worst possible artifact on this record.
+server: null
+transport: null
+url: null
+auth:
+  type: none
+  note: The backing surface is anonymous and read-only, so a server built on it would need no credential.
+candidate_tools:
+  - name: search_odni_content
+    description: Search ODNI press releases, remarks, interviews, reports and publications by keyword.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#search
+    maps_to: GET /wp/v2/search
+  - name: list_odni_news
+    description: List ODNI newsroom posts, filterable by category, author and date range.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#listPosts
+    maps_to: GET /wp/v2/posts
+  - name: get_odni_news_item
+    description: Retrieve the full text of one ODNI newsroom post by id.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#getPost
+    maps_to: GET /wp/v2/posts/{id}
+  - name: list_odni_publications
+    description: List published ODNI documents — transparency reports, Annual Threat Assessments, IC directives, NCTC counterterrorism guides.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#listDownloads
+    maps_to: GET /wp/v2/dlm_download
+  - name: get_odni_publication
+    description: Retrieve one ODNI publication record, including its download link and download count.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#getDownload
+    maps_to: GET /wp/v2/dlm_download/{id}
+  - name: list_odni_publication_categories
+    description: List the taxonomy terms the publications catalog is organized by.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#listDownloadCategories
+    maps_to: GET /wp/v2/dlm_download_category
+  - name: list_odni_news_categories
+    description: List the newsroom categories (press-releases, remarks, interviews, reports) with counts.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#listCategories
+    maps_to: GET /wp/v2/categories
+  - name: get_odni_page
+    description: Retrieve one ODNI site page by id — About, Leadership, Transparency, Accountability, the mission-center pages.
+    source_operation: openapi/director-of-national-intelligence-wp-content-openapi.yml#getPage
+    maps_to: GET /wp/v2/pages/{id}
+implementation_note: >-
+  Any implementer must use the query-string route form (https://www.odni.gov/?rest_route=/wp/v2/...) and
+  a plain, non-browser User-Agent. The canonical /wp-json/ base 301s to the homepage, and browser-shaped
+  User-Agent strings are refused with 403 by the edge.

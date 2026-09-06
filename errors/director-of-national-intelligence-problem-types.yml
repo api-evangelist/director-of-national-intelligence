@@ -1,0 +1,118 @@
+generated: '2026-09-06'
+method: probed
+source: >-
+  live error responses observed against https://www.odni.gov/?rest_route=/... on 2026-09-06; cross-checked
+  against openapi/director-of-national-intelligence-wp-content-openapi.yml
+format: wordpress-rest
+rfc9457: false
+media_type: application/json
+note: >-
+  This API does NOT use RFC 9457 application/problem+json. It returns the WordPress REST error envelope:
+  a machine-readable `code`, a human `message`, and a `data` object that repeats the HTTP status and, on
+  parameter validation failures, names the offending parameters. ODNI publishes no error reference; every
+  entry below was observed live, with the exact request that produced it recorded as evidence.
+envelope:
+  shape: '{"code": string, "message": string, "data": {"status": integer, "params": object|array, "details": object}}'
+  status_repeated_in_body: true
+  parameter_detail_field: data.params
+problems:
+  - code: rest_invalid_param
+    status: 400
+    title: Invalid parameter
+    message: 'Invalid parameter(s): <name>'
+    remediation: >-
+      Read data.params — it maps each rejected parameter to the reason, including the permitted range or
+      enum. per_page must be 1-100; orderby must be one of the collection's documented values.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/posts&per_page=999', status: 400, detail: 'per_page must be between 1 (inclusive) and 100 (inclusive)'}
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/posts&orderby=bogus', status: 400, detail: 'orderby is not one of author, date, id, include, modified, parent, relevance, slug, include_slugs, and title.'}
+    source_operations: [listPosts, listPages, listDownloads, listMedia, listCategories, search]
+  - code: rest_missing_callback_param
+    status: 400
+    title: Missing required parameter
+    message: 'Missing parameter(s): <name>'
+    remediation: Supply the parameter named in data.params.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/oembed/1.0/embed', status: 400, detail: 'params: ["url"]'}
+    source_operations: [oembed]
+  - code: rest_no_route
+    status: 404
+    title: No matching route
+    message: No route was found matching the URL and request method.
+    remediation: >-
+      Check the route against the discovery document at https://www.odni.gov/?rest_route=/ . Note that a
+      wrong BASE (using /wp-json/ instead of ?rest_route=) does not produce this error — it produces a
+      302 to the site homepage instead, which is far harder to diagnose.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/nope', status: 404}
+    source_operations: []
+  - code: rest_post_invalid_id
+    status: 404
+    title: Invalid post ID
+    message: Invalid post ID.
+    remediation: The id does not exist or is not publicly visible. List the collection first.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/posts/99999999', status: 404}
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/media/999999', status: 404}
+    source_operations: [getPost, getPage, getDownload, getMedia]
+  - code: rest_term_invalid
+    status: 404
+    title: Term does not exist
+    message: Term does not exist.
+    remediation: >-
+      Taxonomy term ids are not sequential from 1 — the four newsroom categories in use are 4, 5, 6 and
+      118. List the taxonomy first.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/categories/999999', status: 404}
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/categories/1', status: 404, note: 'id 1 does not exist on this site'}
+    source_operations: [getCategory, getDownloadCategory]
+  - code: rest_user_invalid_id
+    status: 404
+    title: Invalid user ID
+    message: Invalid user ID.
+    remediation: Only authors with published content are exposed. List /wp/v2/users first.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/users/999999', status: 404}
+    source_operations: [getAuthor]
+  - code: rest_taxonomy_invalid
+    status: 404
+    title: Invalid taxonomy
+    message: Invalid taxonomy.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/taxonomies/nope', status: 404}
+    source_operations: [getTaxonomy]
+  - code: rest_type_invalid
+    status: 404
+    title: Invalid post type
+    message: Invalid post type.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/types/nope', status: 404}
+    source_operations: [getType]
+  - code: oembed_invalid_url
+    status: 404
+    title: oEmbed URL not found
+    message: Not Found
+    remediation: The url parameter must resolve to a post or page on www.odni.gov.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/oembed/1.0/embed&url=https%3A%2F%2Fexample.com%2F', status: 404}
+    source_operations: [oembed]
+  - code: rest_forbidden
+    status: 401
+    title: Not permitted
+    message: Sorry, you are not allowed to do that.
+    remediation: >-
+      The route is part of the authenticated administrative surface and is not public. It is not in the
+      catalogued API.
+    evidence:
+      - {url: 'https://www.odni.gov/?rest_route=/wp/v2/settings', status: 401}
+    source_operations: []
+undocumented_failure_mode:
+  title: Silent 302 to the homepage on the canonical base URL
+  detail: >-
+    The most likely failure an integrator hits is not in this catalog at all, because it never reaches
+    the API. Any request to https://www.odni.gov/wp-json/... — the base every WordPress client and every
+    _links value in the payloads uses — is answered by the Akamai edge with HTTP 301 to
+    https://www.odni.gov/ , which then returns HTTP 200 and 187KB of HTML. A client that does not check
+    the content type parses a web page as JSON. There is no error body and no diagnostic.
+  evidence:
+    - {url: 'https://www.odni.gov/wp-json/wp/v2/posts?per_page=1', status: 301, location: 'https://www.odni.gov/'}
