@@ -47,9 +47,9 @@ image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/director-o
 tags:
 - Federal-Government
 - Intelligence
-- National-Security
+- National Security
 - Government
-- Public-Sector
+- Public Sector
 - Transparency
 - News
 - Publications
@@ -64,33 +64,164 @@ tags_raw:
 - Publications
 access: 3rd-Party
 created: '2024-07-11'
-modified: '2026-09-06'
+modified: '2026-09-16'
 position: Producing
 specificationVersion: '0.23'
 apis:
-- aid: director-of-national-intelligence:odni-public-content-api
-  name: ODNI Public Content API
-  description: The anonymous, read-only WordPress REST API behind www.odni.gov. Serves ODNI newsroom posts
-    (press releases, remarks, interviews and reports), the site's structural pages, the media library,
-    and the Download Monitor catalog of published ODNI documents. DERIVED description — ODNI publishes
-    no specification; the OpenAPI here was derived from the live route discovery document and every operation
-    was confirmed 200 anonymously on 2026-09-06. The canonical /wp-json/ root is 301'd to the homepage
-    by the site's Akamai edge, so the API is reachable only through the query-string route form https://www.odni.gov/?rest_route=/...
-    . Content only — no intelligence holdings are exposed.
-  image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/director-of-national-intelligence.png
+- aid: director-of-national-intelligence:director-of-national-intelligence-discovery-api
+  name: Director of National Intelligence Discovery API
+  description: Content types, taxonomies, statuses, authors and oEmbed.
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - Discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-discovery-api-openapi.yml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
+- aid: director-of-national-intelligence:director-of-national-intelligence-media-api
+  name: Director of National Intelligence Media API
+  description: Media library uploads.
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - Media
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-media-api-openapi.yml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
+- aid: director-of-national-intelligence:director-of-national-intelligence-news-api
+  name: Director of National Intelligence News API
+  description: ODNI newsroom posts — press releases, remarks, interviews and reports.
   humanURL: https://www.odni.gov/newsroom/
   baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - News
-  - Publications
-  - Content
-  - Government
-  - Transparency
   properties:
   - type: OpenAPI
-    url: openapi/director-of-national-intelligence-wp-content-openapi.yml
-  - type: Overlay
-    url: overlays/director-of-national-intelligence-wp-content-overlay.yaml
+    url: openapi/director-of-national-intelligence-news-api-openapi.yml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
+- aid: director-of-national-intelligence:director-of-national-intelligence-pages-api
+  name: Director of National Intelligence Pages API
+  description: Structural site pages.
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - Pages
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-pages-api-openapi.yml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
+- aid: director-of-national-intelligence:director-of-national-intelligence-publications-api
+  name: Director of National Intelligence Publications API
+  description: The Download Monitor catalog of published ODNI documents.
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - Publications
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-publications-api-openapi.yml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
+- aid: director-of-national-intelligence:director-of-national-intelligence-search-api
+  name: Director of National Intelligence Search API
+  description: Cross-type site search.
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - Search
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-search-api-openapi.yml
+  - type: Examples
+    url: examples/director-of-national-intelligence-posts.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-downloads.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-download-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-categories.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-types.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-taxonomies.json
+  - type: Examples
+    url: examples/director-of-national-intelligence-search.json
+- aid: director-of-national-intelligence:director-of-national-intelligence-taxonomy-api
+  name: Director of National Intelligence Taxonomy API
+  description: Categories and tags classifying news and publications.
+  humanURL: https://www.odni.gov/newsroom/
+  baseURL: https://www.odni.gov/?rest_route=/
+  tags:
+  - Taxonomy
+  properties:
+  - type: OpenAPI
+    url: openapi/director-of-national-intelligence-taxonomy-api-openapi.yml
   - type: Examples
     url: examples/director-of-national-intelligence-posts.json
   - type: Examples
@@ -107,7 +238,7 @@ apis:
     url: examples/director-of-national-intelligence-search.json
 common:
 - type: OpenAPI
-  url: openapi/director-of-national-intelligence-wp-content-openapi.yml
+  url: openapi/_original/director-of-national-intelligence-wp-content-openapi.yml
 - type: Authentication
   url: authentication/director-of-national-intelligence-authentication.yml
 - type: Conventions
