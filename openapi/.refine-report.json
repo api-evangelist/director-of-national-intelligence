@@ -1,0 +1,32 @@
+{
+  "provider": "director-of-national-intelligence",
+  "sources": [
+    "_original/director-of-national-intelligence-wp-content-openapi.yml"
+  ],
+  "outputs": [
+    "director-of-national-intelligence-discovery-api-openapi.yml",
+    "director-of-national-intelligence-media-api-openapi.yml",
+    "director-of-national-intelligence-news-api-openapi.yml",
+    "director-of-national-intelligence-pages-api-openapi.yml",
+    "director-of-national-intelligence-publications-api-openapi.yml",
+    "director-of-national-intelligence-search-api-openapi.yml",
+    "director-of-national-intelligence-taxonomy-api-openapi.yml"
+  ],
+  "archived": [],
+  "errors": [],
+  "warnings": [],
+  "notes": [
+    "sourced from openapi/_original/ (1 archived document(s)); previously refined output at the top level was skipped rather than re-split",
+    "director-of-national-intelligence-wp-content-openapi.yml: upgraded openapi 3.1.0 -> OpenAPI 3.2.0",
+    "apis.yml register: already-registered"
+  ],
+  "skipped": [
+    "director-of-national-intelligence-discovery-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "director-of-national-intelligence-media-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "director-of-national-intelligence-news-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "director-of-national-intelligence-pages-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "director-of-national-intelligence-publications-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "director-of-national-intelligence-search-api-openapi.yml: previously refined output, superseded by openapi/_original/",
+    "director-of-national-intelligence-taxonomy-api-openapi.yml: previously refined output, superseded by openapi/_original/"
+  ]
+}

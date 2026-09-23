@@ -1,0 +1,322 @@
+openapi: 3.2.0
+info:
+  title: ODNI Public Content API (WordPress REST) Publications API
+  version: wp/v2
+  summary: The anonymous, read-only WordPress REST API serving www.odni.gov content — newsroom posts, site pages, and the ODNI publications/downloads catalog.
+  description: The Office of the Director of National Intelligence publishes no developer program, no API documentation and no machine-readable specification of its own.
+  contact:
+    name: ODNI Public Affairs
+    url: https://www.odni.gov/get-in-touch/
+  license:
+    name: U.S. Government Work (17 U.S.C. Sec. 105) — see ODNI website policies
+    url: https://www.odni.gov/policies/
+  x-provenance:
+    method: derived
+    source: https://www.odni.gov/?rest_route=/
+    derived: '2026-09-06'
+    verbatim_source_file: openapi/director-of-national-intelligence-wp-routes-original.json
+    note: Derived by API Evangelist from the live WordPress route discovery document served by www.odni.gov. Not authored, published or endorsed by ODNI.
+servers:
+- url: https://www.odni.gov/wp-json
+  description: Canonical WordPress REST root. NOT CALLABLE as of 2026-09-06 — the Akamai edge answers 301 to https://www.odni.gov/ for /wp-json and every path beneath it.
+- url: https://www.odni.gov/?rest_route=
+  description: Working prefix. WordPress's alternate query-string route form; concatenate the operation path directly after this URL (https://www.odni.gov/?rest_route=/wp/v2/posts). Verified 200 on 2026-09-06.
+security:
+- {}
+tags:
+- name: Publications
+  description: The Download Monitor catalog of published ODNI documents.
+paths:
+  /wp/v2/dlm_download:
+    get:
+      operationId: listDownloads
+      summary: List ODNI publications and downloads
+      description: The Download Monitor custom post type behind ODNI's published documents — transparency reports, Annual Threat Assessments, IC directives, counterterrorism guides and declassified releases. This is the closest thing on the site to a document catalog.
+      tags:
+      - Publications
+      security:
+      - {}
+      parameters:
+      - name: after
+        in: query
+        description: Limit response to posts published after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: before
+        in: query
+        description: Limit response to posts published before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: context
+        in: query
+        description: Scope under which the request is made; determines fields present in response.
+        required: false
+        schema:
+          type: string
+          enum:
+          - view
+          - embed
+          - edit
+          default: view
+      - name: dlm_download_category
+        in: query
+        description: Limit result set to items with specific terms assigned in the dlm_download_category taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: dlm_download_category_exclude
+        in: query
+        description: Limit result set to items except those with specific terms assigned in the dlm_download_category taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: dlm_download_tag
+        in: query
+        description: Limit result set to items with specific terms assigned in the dlm_download_tag taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: dlm_download_tag_exclude
+        in: query
+        description: Limit result set to items except those with specific terms assigned in the dlm_download_tag taxonomy.
+        required: false
+        schema:
+          type: object
+      - name: exclude
+        in: query
+        description: Ensure result set excludes specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: include
+        in: query
+        description: Limit result set to specific IDs.
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+          default: []
+      - name: modified_after
+        in: query
+        description: Limit response to posts modified after a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: modified_before
+        in: query
+        description: Limit response to posts modified before a given ISO8601 compliant date.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: offset
+        in: query
+        description: Offset the result set by a specific number of items.
+        required: false
+        schema:
+          type: integer
+      - name: order
+        in: query
+        description: Order sort attribute ascending or descending.
+        required: false
+        schema:
+          type: string
+          enum:
+          - asc
+          - desc
+          default: desc
+      - name: orderby
+        in: query
+        description: Sort collection by post attribute.
+        required: false
+        schema:
+          type: string
+          enum:
+          - author
+          - date
+          - id
+          - include
+          - modified
+          - parent
+          - relevance
+          - slug
+          - include_slugs
+          - title
+          default: date
+      - name: page
+        in: query
+        description: Current page of the collection.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          default: 1
+      - name: per_page
+        in: query
+        description: Maximum number of items to be returned in result set.
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 100
+          default: 10
+      - name: search
+        in: query
+        description: Limit results to those matching a string.
+        required: false
+        schema:
+          type: string
+      - name: search_columns
+        in: query
+        description: Array of column names to be searched.
+        required: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+            - post_title
+            - post_content
+            - post_excerpt
+          default: []
+      - name: search_semantics
+        in: query
+        description: How to interpret the search input.
+        required: false
+        schema:
+          type: string
+          enum:
+          - exact
+      - name: tax_relation
+        in: query
+        description: Limit result set based on relationship between multiple taxonomies.
+        required: false
+        schema:
+          type: string
+          enum:
+          - AND
+          - OR
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPCollection'
+              examples:
+                saved:
+                  summary: Saved response captured 2026-09-06
+                  externalValue: ../examples/director-of-national-intelligence-downloads.json
+          headers:
+            X-WP-Total:
+              description: Total number of matching records.
+              schema:
+                type: integer
+            X-WP-TotalPages:
+              description: Total number of pages available at the current per_page.
+              schema:
+                type: integer
+            Link:
+              description: RFC 8288 pagination links (rel="next" / rel="prev").
+              schema:
+                type: string
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming the offending parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPError'
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPError'
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download&per_page=3
+        status: 200
+        date: '2026-09-06'
+  /wp/v2/dlm_download/{id}:
+    get:
+      operationId: getDownload
+      summary: Retrieve one ODNI publication
+      description: Retrieve a single publication/download record by id.
+      tags:
+      - Publications
+      security:
+      - {}
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Download id.
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Successful response.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPObject'
+        '400':
+          description: Invalid parameter. WordPress returns `rest_invalid_param` with a `data.params` map naming the offending parameters.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPError'
+        '404':
+          description: No matching route or record (`rest_no_route`, `rest_post_invalid_id`, `rest_term_invalid`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WPError'
+      x-verified:
+        url: https://www.odni.gov/?rest_route=/wp/v2/dlm_download/14142
+        status: 200
+        date: '2026-09-06'
+components:
+  schemas:
+    WPObject:
+      type: object
+      description: A single WordPress REST record.
+    WPError:
+      type: object
+      description: The WordPress REST error envelope. This API does NOT use RFC 9457 application/problem+json; errors are returned as application/json with this shape.
+      required:
+      - code
+      - message
+      - data
+      properties:
+        code:
+          type: string
+          description: Machine-readable error code, e.g. rest_invalid_param, rest_no_route, rest_post_invalid_id, rest_forbidden.
+        message:
+          type: string
+          description: Human-readable message.
+        data:
+          type: object
+          properties:
+            status:
+              type: integer
+              description: The HTTP status, repeated in the body.
+            params:
+              type: object
+              description: 'Present on rest_invalid_param: a map of offending parameter name to explanation.'
+            details:
+              type: object
+              description: 'Present on rest_invalid_param: per-parameter code/message/data detail.'
+    WPCollection:
+      type: array
+      description: A page of WordPress REST records. Page size is controlled by per_page (1-100, default 10) and page; the total count and page count are returned in the X-WP-Total and X-WP-TotalPages response headers.
+      items:
+        type: object
