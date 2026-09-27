@@ -286,9 +286,6 @@ paths:
         date: '2026-09-06'
 components:
   schemas:
-    WPObject:
-      type: object
-      description: A single WordPress REST record.
     WPError:
       type: object
       description: The WordPress REST error envelope. This API does NOT use RFC 9457 application/problem+json; errors are returned as application/json with this shape.
@@ -315,6 +312,9 @@ components:
             details:
               type: object
               description: 'Present on rest_invalid_param: per-parameter code/message/data detail.'
+    WPObject:
+      type: object
+      description: A single WordPress REST record.
     WPCollection:
       type: array
       description: A page of WordPress REST records. Page size is controlled by per_page (1-100, default 10) and page; the total count and page count are returned in the X-WP-Total and X-WP-TotalPages response headers.

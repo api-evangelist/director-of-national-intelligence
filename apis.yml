@@ -45,7 +45,7 @@ accessModel:
       domain (dni.gov -> odni.gov); Website pointer moved to odni.gov on 2026-09-06
 image: https://kinlane-images.s3.amazonaws.com/shared/apis-json/icons/director-of-national-intelligence.png
 tags:
-- Federal-Government
+- Federal Government
 - Intelligence
 - National Security
 - Government
@@ -62,6 +62,7 @@ tags_raw:
 - Transparency
 - News
 - Publications
+- Federal-Government
 access: 3rd-Party
 created: '2024-07-11'
 modified: '2026-09-16'
@@ -72,7 +73,6 @@ apis:
   name: Director of National Intelligence Discovery API
   description: Content types, taxonomies, statuses, authors and oEmbed.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - Discovery
   properties:
@@ -96,7 +96,6 @@ apis:
   name: Director of National Intelligence Media API
   description: Media library uploads.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - Media
   properties:
@@ -120,7 +119,6 @@ apis:
   name: Director of National Intelligence News API
   description: ODNI newsroom posts — press releases, remarks, interviews and reports.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - News
   properties:
@@ -144,7 +142,6 @@ apis:
   name: Director of National Intelligence Pages API
   description: Structural site pages.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - Pages
   properties:
@@ -168,7 +165,6 @@ apis:
   name: Director of National Intelligence Publications API
   description: The Download Monitor catalog of published ODNI documents.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - Publications
   properties:
@@ -192,7 +188,6 @@ apis:
   name: Director of National Intelligence Search API
   description: Cross-type site search.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - Search
   properties:
@@ -216,7 +211,6 @@ apis:
   name: Director of National Intelligence Taxonomy API
   description: Categories and tags classifying news and publications.
   humanURL: https://www.odni.gov/newsroom/
-  baseURL: https://www.odni.gov/?rest_route=/
   tags:
   - Taxonomy
   properties:
